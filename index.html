@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Wallhaven — Wallpapers for your screen</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: #101116;
+      color: #f5f5f7;
+      font: 15px/1.5 Arial, sans-serif;
+    }
+    header {
+      padding: 20px 6%;
+      border-bottom: 1px solid #292a33;
+      font-size: 22px;
+      font-weight: bold;
+    }
+    header span { color: #a78bfa; }
+    .hero {
+      padding: 55px 6% 35px;
+    }
+    .hero h1 {
+      font-size: clamp(42px, 7vw, 72px);
+      line-height: 1;
+      margin: 12px 0;
+    }
+    .hero h1 span { color: #c4b5fd; }
+    .hero p { color: #aaa; }
+    .controls {
+      padding: 10px 6% 20px;
+    }
+    input {
+      width: 100%;
+      padding: 14px;
+      border: 1px solid #33343d;
+      border-radius: 10px;
+      background: #191a21;
+      color: white;
+      font-size: 15px;
+    }
+    .categories {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px;
+      margin-top: 15px;
+    }
+    .categories button, #more {
+      padding: 10px 15px;
+      border: 1px solid #393943;
+      border-radius: 20px;
+      background: #191a21;
+      color: white;
+      cursor: pointer;
+    }
+    .categories button.active,
+    .categories button:hover,
+    #more:hover {
+      background: #49376f;
+    }
+    h2 { padding: 0 6%; }
+    #count { padding: 0 6%; color: #aaa; }
+    .grid {
+      padding: 10px 6% 35px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+    .card {
+      position: relative;
+      overflow: hidden;
+      aspect-ratio: 3 / 4;
+      border-radius: 12px;
+      background: #222;
+    }
+    .card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform .3s;
+    }
+    .card:hover img { transform: scale(1.05); }
+    .label {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      padding: 5px 9px;
+      border-radius: 20px;
+      background: #101116c9;
+      font-size: 12px;
+    }
+    .info {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      right: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 5px;
+      text-shadow: 0 1px 5px black;
+    }
+    .info button {
+      padding: 9px 11px;
+      border: 0;
+      border-radius: 8px;
+      background: white;
+      color: #17151d;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .more-wrap { text-align: center; padding: 10px 0 55px; }
+    #more { border-radius: 10px; }
+    footer {
+      padding: 25px 6%;
+      border-top: 1px solid #292a33;
+      color: #999;
+    }
+    @media (max-width: 800px) {
+      .grid { grid-template-columns: repeat(3, 1fr); }
+    }
+    @media (max-width: 550px) {
+      .grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    }
+  </style>
+</head>
+<body>
+  <header>wall<span>haven</span></header>
+
+  <section class="hero">
+    <small>MAKE YOUR SCREEN YOURS</small>
+    <h1>Find your next<br><span>wallpaper.</span></h1>
+    <p>Explore anime, cars, abstract art, nature, space and more. Download your favorite wallpapers for free.</p>
+  </section>
+
+  <section class="controls">
+    <input id="search" placeholder="Search wallpapers..." aria-label="Search wallpapers">
+    <div class="categories" id="categories"></div>
+  </section>
+
+  <h2 id="heading">Explore wallpapers</h2>
+  <div id="count"></div>
+  <main class="grid" id="grid"></main>
+  <div class="more-wrap"><button id="more">Load more wallpapers ↓</button></div>
+
+  <footer>Wallhaven · Wallpapers for your screens</footer>
+
+  <script>
+    const collections = {
+      Anime: {
+        names: ["Neon Ronin", "Moonlit Tokyo", "Sakura Drift", "Starfall", "Spirit Bloom"],
+        photos: ["photo-1578632767115-351597cf2477", "photo-1601850494422-3cf14624b0b3", "photo-1614583225154-5fc419594a0c"]
+      },
+      Cars: {
+        names: ["Midnight GT", "Desert Runner", "Electric Pulse", "Apex at Dawn", "Chrome Legend"],
+        photos: ["photo-1492144534655-ae79c964c9d7", "photo-1503376780353-7e6692767b70", "photo-1503736334956-4c8f8e92946d"]
+      },
+      Abstract: {
+        names: ["Liquid Geometry", "Chromatic Drift", "Prism Fields", "Dream Fragments", "Fluid State"],
+        photos: ["photo-1550852546-536adafb0e52", "photo-1550684848-fac1c5b4e853", "photo-1541701494587-cb58502866ab"]
+      },
+      Nature: {
+        names: ["Alpine Silence", "Forest After Rain", "Ocean Glass", "Autumn Trail", "Golden Meadow"],
+        photos: ["photo-1470770841072-f978cf4d019e", "photo-1448375240586-882707db888b", "photo-1501785888041-af3ef285b470"]
+      },
+      Space: {
+        names: ["Cosmic Dust", "Lunar Echo", "Red Planet", "Nebula Dream", "Stardust"],
+        photos: ["photo-1462331940025-496dfbfc7564", "photo-1446776811953-b23d57bd21aa", "photo-1451187580459-43490279c0fa"]
+      },
+      Minimal: {
+        names: ["Quiet Form", "Soft Balance", "Calm Lines", "Still Life", "Clean Slate"],
+        photos: ["photo-1494438639946-1ebd1d20bf85", "photo-1513519245088-0e12902e5a38"]
+      }
+    };
+
+    const wallpapers = [];
+    let id = 0;
+
+    for (const [category, data] of Object.entries(collections)) {
+      for (let i = 0; i < 168; i++) {
+        wallpapers.push({
+          id: id++,
+          category,
+          title: data.names[i % data.names.length] + (i >= data.names.length ? " " + (Math.floor(i / data.names.length) + 1) : ""),
+          photo: data.photos[i % data.photos.length]
+        });
+      }
+    }
+
+    let selected = "All";
+    let searchText = "";
+    let visible = 24;
+
+    const grid = document.getElementById("grid");
+    const categoryBox = document.getElementById("categories");
+
+    ["All", ...Object.keys(collections)].forEach((category, index) => {
+      const button = document.createElement("button");
+      button.textContent = category === "All" ? "All wallpapers" : category;
+      if (index === 0) button.classList.add("active");
+
+      button.onclick = () => {
+        selected = category;
+        visible = 24;
+        document.querySelectorAll(".categories button").forEach(b => b.classList.remove("active"));
+        button.classList.add("active");
+        document.getElementById("heading").textContent =
+          category === "All" ? "Explore wallpapers" : category + " wallpapers";
+        render();
+      };
+
+      categoryBox.appendChild(button);
+    });
+
+    function render() {
+      const results = wallpapers.filter(w => {
+        const matchesCategory = selected === "All" || w.category === selected;
+        const matchesSearch = (w.title + " " + w.category).toLowerCase().includes(searchText);
+        return matchesCategory && matchesSearch;
+      });
+
+      document.getElementById("count").textContent =
+        `Showing ${Math.min(visible, results.length)} of ${results.length} wallpapers`;
+
+      grid.innerHTML = results.slice(0, visible).map(w => {
+        const image = `https://images.unsplash.com/${w.photo}?auto=format&fit=crop&w=800&q=80`;
+        return `
+          <article class="card">
+            <img src="${image}" alt="${w.title} wallpaper" loading="lazy">
+            <span class="label">${w.category}</span>
+            <div class="info">
+              <strong>${w.title}</strong>
+              <button onclick="downloadWallpaper('${image}', '${w.title}')">↓ Download</button>
+            </div>
+          </article>`;
+      }).join("");
+
+      document.getElementById("more").style.display =
+        results.length > visible ? "inline-block" : "none";
+    }
+
+    async function downloadWallpaper(url, title) {
+      try {
+        const response = await fetch(url);
+        const blob = await response.blob();
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = title.replaceAll(" ", "-") + ".jpg";
+        link.click();
+        URL.revokeObjectURL(link.href);
+      } catch {
+        window.open(url, "_blank");
+      }
+    }
+
+    document.getElementById("search").addEventListener("input", event => {
+      searchText = event.target.value.toLowerCase().trim();
+      visible = 24;
+      render();
+    });
+
+    document.getElementById("more").onclick = () => {
+      visible += 24;
+      render();
+    };
+
+    render();
+  </script>
+</body>
+</html>
